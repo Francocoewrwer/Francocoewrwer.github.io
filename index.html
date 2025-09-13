@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Playa de Estacionamiento Interactiva</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .espacio {
+      width: 60px;
+      height: 100px;
+      border: 2px solid green;
+      background-color: rgba(0, 255, 0, 0.2);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 0.9rem;
+      border-radius: 8px;
+      transition: all 0.2s ease-in-out;
+    }
+    .espacio:hover {
+      background-color: rgba(0, 255, 0, 0.4);
+    }
+    .ocupado {
+      border: 2px solid red !important;
+      background-color: rgba(255, 0, 0, 0.4) !important;
+    }
+    .plano {
+      display: flex;
+      flex-direction: column;
+      gap: 40px; /* separación entre filas */
+      align-items: flex-start;
+    }
+    .fila {
+      display: flex;
+      gap: 20px;
+    }
+    .fila.inferior {
+      margin-left: 40px; /* desplazamiento como en el plano */
+    }
+    .fila.derecha {
+      margin-left: 500px; /* cajones de abajo a la derecha */
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center p-6">
+  <h1 class="text-3xl font-bold mb-6 text-gray-800">Playa de Estacionamiento</h1>
+
+  <!-- Formulario -->
+  <div class="bg-white shadow-md rounded-2xl p-6 w-full max-w-lg mb-12">
+    <h2 class="text-xl font-semibold mb-4 text-gray-700">Ingresar vehículo</h2>
+    <div class="flex gap-2">
+      <input id="patente" type="text" placeholder="Patente"
+        class="flex-1 border rounded-xl p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+      <button onclick="ingresarAuto()" class="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700">
+        Ingresar
+      </button>
+    </div>
+    <p id="espacio-seleccionado" class="mt-2 text-sm text-gray-600"></p>
+  </div>
+
+  <!-- Tabla autos en playa -->
+  <div class="bg-white shadow-md rounded-2xl p-6 w-full max-w-4xl mb-12">
+    <h2 class="text-xl font-semibold mb-4 text-gray-700">Vehículos en playa</h2>
+    <table class="w-full border-collapse">
+      <thead>
+        <tr class="bg-gray-200">
+          <th class="p-2 text-left">Patente</th>
+          <th class="p-2 text-left">Espacio</th>
+          <th class="p-2 text-left">Hora ingreso</th>
+          <th class="p-2 text-left">Tiempo</th>
+          <th class="p-2">Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-autos"></tbody>
+    </table>
+  </div>
+
+  <!-- Historial -->
+  <div class="bg-white shadow-md rounded-2xl p-6 w-full max-w-5xl mb-12">
+    <h2 class="text-xl font-semibold mb-4 text-gray-700">Historial de cobros</h2>
+    <table class="w-full border-collapse mb-4">
+      <thead>
+        <tr class="bg-gray-200">
+          <th class="p-2 text-left">Patente</th>
+          <th class="p-2 text-left">Espacio</th>
+          <th class="p-2 text-left">Ingreso</th>
+          <th class="p-2 text-left">Salida</th>
+          <th class="p-2 text-left">Tiempo</th>
+          <th class="p-2 text-left">Monto</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-historial"></tbody>
+    </table>
+    <div class="text-right text-lg font-semibold text-gray-800">
+      Total acumulado: $<span id="total-acumulado">0</span>
+    </div>
+  </div>
+
+  <!-- Plano de cajones -->
+  <div class="bg-white shadow-md rounded-2xl p-6">
+    <h2 class="text-xl font-semibold mb-6 text-gray-700 text-center">Plano de Estacionamiento</h2>
+    <div class="plano">
+
+      <!-- Fila A (arriba, 10 espacios) -->
+      <div class="fila">
+        <div class="espacio" onclick="seleccionarEspacio(this, 'A1')">A1</div>
+        <div class="espacio" onclick="seleccionarEspacio(this, 'A2')">A2</div>
+        <div class="espacio" onclick="seleccionarEspacio(this, 'A3')">A3</div>
+        <div class="espacio" onclick="seleccionarEspacio(this, 'A4')">A4</div>
+        <div class="espacio" onclick="seleccionarEspacio(this, 'A5')">A5</div>
+        <div class="espacio" onclick="seleccionarEspacio(this, 'A6')">A6</div>
+        <div class="espacio" onclick="seleccionarEspacio(this, 'A7')">A7</div>
+        <div class="espacio" onclick="seleccionarEspacio(this, 'A8')">A8</div>
+        <div class="espacio" onclick="seleccionarEspacio(this, 'A9')">A9</div>
+        <div class="espacio" onclick="seleccionarEspacio(this, 'A10')">A10</div>
+      </div>
+
+      <!-- Fila B (6 en el medio) -->
+      <div class="fila inferior">
+        <div class="espacio" onclick="seleccionarEspacio(this, 'B1')">B1</div>
+        <div class="espacio" onclick="seleccionarEspacio(this, 'B2')">B2</div>
+        <div class="espacio" onclick="seleccionarEspacio(this, 'B3')">B3</div>
+        <div class="espacio" onclick="seleccionarEspacio(this, 'B4')">B4</div>
+        <div class="espacio" onclick="seleccionarEspacio(this, 'B5')">B5</div>
+        <div class="espacio" onclick="seleccionarEspacio(this, 'B6')">B6</div>
+      </div>
+
+      <!-- Fila C (abajo a la derecha, 2 espacios) -->
+      <div class="fila derecha">
+        <div class="espacio" onclick="seleccionarEspacio(this, 'C1')">C1</div>
+        <div class="espacio" onclick="seleccionarEspacio(this, 'C2')">C2</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const autos = [];
+    const historial = [];
+    let totalAcumulado = 0;
+    let espacioSeleccionado = null;
+    let divSeleccionado = null;
+
+    function seleccionarEspacio(div, id) {
+      if (div.classList.contains("ocupado")) {
+        alert("Este espacio ya está ocupado");
+        return;
+      }
+      espacioSeleccionado = id;
+      divSeleccionado = div;
+      document.getElementById("espacio-seleccionado").textContent = "Espacio seleccionado: " + id;
+    }
+
+    function ingresarAuto() {
+      const patente = document.getElementById("patente").value.trim().toUpperCase();
+      if (!patente || !espacioSeleccionado) {
+        return alert("Ingrese patente y seleccione un espacio libre.");
+      }
+
+      autos.push({
+        patente,
+        espacio: espacioSeleccionado,
+        ingreso: new Date(),
+        div: divSeleccionado
+      });
+
+      divSeleccionado.classList.add("ocupado");
+      document.getElementById("patente").value = "";
+      document.getElementById("espacio-seleccionado").textContent = "";
+      espacioSeleccionado = null;
+      divSeleccionado = null;
+
+      renderTabla();
+    }
+
+    function calcularCosto(ingreso, salida) {
+      const ms = salida - ingreso;
+      const horas = ms / (1000 * 60 * 60);
+      if (horas <= 1) return 4000;
+      if (horas <= 12) return 10000;
+      return 16000;
+    }
+
+    function finalizarAuto(patente) {
+      const auto = autos.find(a => a.patente === patente);
+      if (!auto) return;
+
+      const salida = new Date();
+      const costo = calcularCosto(auto.ingreso, salida);
+
+      const ms = salida - auto.ingreso;
+      const minutos = Math.floor(ms / 1000 / 60);
+      const horas = Math.floor(minutos / 60);
+      const mins = minutos % 60;
+      const tiempo = `${horas}h ${mins}m`;
+
+      historial.push({
+        patente: auto.patente,
+        espacio: auto.espacio,
+        ingreso: auto.ingreso.toLocaleTimeString(),
+        salida: salida.toLocaleTimeString(),
+        tiempo,
+        costo
+      });
+
+      totalAcumulado += costo;
+      alert(`Patente: ${patente}\nMonto a cobrar: $${costo}`);
+
+      auto.div.classList.remove("ocupado");
+      autos.splice(autos.indexOf(auto), 1);
+
+      renderTabla();
+      renderHistorial();
+    }
+
+    function renderTabla() {
+      const tbody = document.getElementById("tabla-autos");
+      tbody.innerHTML = "";
+
+      autos.forEach(auto => {
+        const tr = document.createElement("tr");
+        tr.className = "border-b";
+
+        const tiempo = Math.floor((new Date() - auto.ingreso) / 1000 / 60);
+        const horas = Math.floor(tiempo / 60);
+        const minutos = tiempo % 60;
+
+        tr.innerHTML = `
+          <td class="p-2">${auto.patente}</td>
+          <td class="p-2">${auto.espacio}</td>
+          <td class="p-2">${auto.ingreso.toLocaleTimeString()}</td>
+          <td class="p-2">${horas}h ${minutos}m</td>
+          <td class="p-2 text-center">
+            <button onclick="finalizarAuto('${auto.patente}')" class="bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700">
+              Finalizar
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderHistorial() {
+      const tbody = document.getElementById("tabla-historial");
+      tbody.innerHTML = "";
+      historial.forEach(h => {
+        const tr = document.createElement("tr");
+        tr.className = "border-b";
+        tr.innerHTML = `
+          <td class="p-2">${h.patente}</td>
+          <td class="p-2">${h.espacio}</td>
+          <td class="p-2">${h.ingreso}</td>
+          <td class="p-2">${h.salida}</td>
+          <td class="p-2">${h.tiempo}</td>
+          <td class="p-2">$${h.costo}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+      document.getElementById("total-acumulado").textContent = totalAcumulado;
+    }
+
+    setInterval(renderTabla, 60000);
+  </script>
+</body>
+</html>
